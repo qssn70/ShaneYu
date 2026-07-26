@@ -499,4 +499,95 @@ import "./i18n";
   }
 
   initDynamicBackground();
+
+  // ===== 情侣卡片时间计算 =====
+  function updateCoupleDuration() {
+    const durationEls = document.querySelectorAll(".couple-duration");
+    durationEls.forEach(function (el) {
+      const sinceDate = el.getAttribute("data-since");
+      if (!sinceDate) {
+        el.textContent = "";
+        return;
+      }
+
+      const startDate = new Date(sinceDate);
+      const now = new Date();
+
+      const diff = now.getTime() - startDate.getTime();
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      // 根据语言选择合适的单位
+      const lang = document.documentElement.getAttribute("lang") || "zh-CN";
+      let dayUnit = "天";
+      let hourUnit = "时";
+      let minuteUnit = "分";
+      let secondUnit = "秒";
+
+      if (lang === "en" || lang === "en-US") {
+        dayUnit = "d";
+        hourUnit = "h";
+        minuteUnit = "m";
+        secondUnit = "s";
+      } else if (lang === "es" || lang === "es-ES") {
+        dayUnit = "d";
+        hourUnit = "h";
+        minuteUnit = "m";
+        secondUnit = "s";
+      } else if (lang === "zh-TW") {
+        dayUnit = "天";
+        hourUnit = "時";
+        minuteUnit = "分";
+        secondUnit = "秒";
+      }
+
+      let result = "";
+      if (days > 0) {
+        result += days + dayUnit;
+      }
+      if (hours > 0) {
+        if (result) result += " ";
+        result += hours + hourUnit;
+      }
+      if (minutes > 0) {
+        if (result) result += " ";
+        result += minutes + minuteUnit;
+      }
+      if (seconds >= 0) {
+        if (result) result += " ";
+        result += seconds + secondUnit;
+      }
+
+      el.textContent = result;
+    });
+  }
+
+  // 页面加载时更新一次
+  updateCoupleDuration();
+
+  // 每秒更新一次
+  setInterval(updateCoupleDuration, 1000);
+
+  // ===== 情侣卡片点击跳转 =====
+  document.addEventListener("click", function (e) {
+    const target = (e.target as HTMLElement).closest(".couple-card[data-couple-link]");
+    if (target) {
+      const link = target.getAttribute("data-couple-link");
+      if (!link) return;
+      // 判断是相对路径还是完整URL
+      if (link.startsWith("http://") || link.startsWith("https://") || link.startsWith("//")) {
+        window.location.href = link;
+      } else {
+        // 相对路径，添加前缀
+        if (!link.startsWith("/")) {
+          window.location.href = "/" + link;
+        } else {
+          window.location.href = link;
+        }
+      }
+    }
+  });
 })();

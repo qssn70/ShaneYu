@@ -180,6 +180,59 @@ spec:
           value: ""
           help: 显示在二维码下方的公众号名称,留空则显示"期待你的关注！"
         - $formkit: switch
+          name: show_couple
+          label: 显示情侣卡片
+          value: false
+          help: 在侧边栏显示情侣卡片组件
+        - $formkit: switch
+          name: show_couple_names
+          label: 显示情侣名字
+          value: true
+          help: 是否在情侣卡片中显示名字
+        - $formkit: switch
+          name: show_couple_avatars
+          label: 显示情侣头像
+          value: true
+          help: 是否在情侣卡片中显示头像
+        - $formkit: attachment
+          name: couple_avatar_1
+          label: 男生头像
+          value: ""
+          help: 情侣卡片左侧头像,建议 1:1 方形图
+        - $formkit: text
+          name: couple_name_1
+          label: 男生名字 *
+          value: ""
+          validation: required
+          help: 左侧头像对应的名字,必填项
+        - $formkit: attachment
+          name: couple_avatar_2
+          label: 女生头像
+          value: ""
+          help: 情侣卡片右侧头像,建议 1:1 方形图
+        - $formkit: text
+          name: couple_name_2
+          label: 女生名字 *
+          value: ""
+          validation: required
+          help: 右侧头像对应的名字,必填项
+        - $formkit: date
+          name: couple_since_date
+          label: 在一起时间 *
+          value: ""
+          validation: required
+          help: 显示在一起的日期,必填项
+        - $formkit: text
+          name: couple_link
+          label: 跳转链接
+          value: ""
+          help: 点击情侣卡片跳转的链接地址，支持相对路径和完整URL
+        - $formkit: color
+          name: couple_color
+          label: 情侣卡片主题色
+          value: "#ef4444"
+          help: 情侣卡片的主题颜色，默认红色
+        - $formkit: switch
           name: show_categories
           label: 显示分类导航
           value: true

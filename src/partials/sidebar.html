@@ -123,6 +123,119 @@
     </div>
   </div>
 
+  <div
+    class="widget widget-couple"
+    th:if="${theme.config?.sidebar?.show_couple and (theme.config?.sidebar?.show_couple_names != false or theme.config?.sidebar?.show_couple_avatars != false)}"
+    th:style="${!#strings.isEmpty(theme.config?.sidebar?.couple_color) ? '--couple-color: ' + theme.config?.sidebar?.couple_color : ''}"
+  >
+    <div
+      class="couple-card"
+      th:if="${theme.config?.sidebar?.couple_link != null and !#strings.isEmpty(theme.config?.sidebar?.couple_link)}"
+      th:attr="data-couple-link=${theme.config?.sidebar?.couple_link}"
+      style="cursor: pointer"
+    >
+      <div class="couple-avatars" th:if="${theme.config?.sidebar?.show_couple_avatars != false}">
+        <div class="couple-avatar">
+          <img
+            th:src="${theme.config?.sidebar?.couple_avatar_1 != null and !#strings.isEmpty(theme.config?.sidebar?.couple_avatar_1) ? theme.config?.sidebar?.couple_avatar_1 : '/themes/theme-ShaneYu/assets/images/avatar.png'}"
+            alt=""
+          />
+        </div>
+        <svg
+          class="couple-heart"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+          />
+        </svg>
+        <div class="couple-avatar">
+          <img
+            th:src="${theme.config?.sidebar?.couple_avatar_2 != null and !#strings.isEmpty(theme.config?.sidebar?.couple_avatar_2) ? theme.config?.sidebar?.couple_avatar_2 : '/themes/theme-ShaneYu/assets/images/avatar.png'}"
+            alt=""
+          />
+        </div>
+      </div>
+      <div class="couple-names" th:if="${theme.config?.sidebar?.show_couple_names != false}">
+        <span th:text="${theme.config?.sidebar?.couple_name_1 ?: '他'}"></span>
+        <svg
+          class="couple-heart-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+          />
+        </svg>
+        <span th:text="${theme.config?.sidebar?.couple_name_2 ?: '她'}"></span>
+      </div>
+      <div class="couple-since">
+        <span data-i18n="sidebar.couple_since">在一起</span>
+        <span
+          class="couple-duration"
+          th:data-since="${theme.config?.sidebar?.couple_since_date}"
+        ></span>
+      </div>
+    </div>
+    <div
+      class="couple-card"
+      th:if="${theme.config?.sidebar?.couple_link == null or #strings.isEmpty(theme.config?.sidebar?.couple_link)}"
+    >
+      <div class="couple-avatars" th:if="${theme.config?.sidebar?.show_couple_avatars != false}">
+        <div class="couple-avatar">
+          <img
+            th:src="${theme.config?.sidebar?.couple_avatar_1 != null and !#strings.isEmpty(theme.config?.sidebar?.couple_avatar_1) ? theme.config?.sidebar?.couple_avatar_1 : '/themes/theme-ShaneYu/assets/images/avatar.png'}"
+            alt=""
+          />
+        </div>
+        <svg
+          class="couple-heart"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+          />
+        </svg>
+        <div class="couple-avatar">
+          <img
+            th:src="${theme.config?.sidebar?.couple_avatar_2 != null and !#strings.isEmpty(theme.config?.sidebar?.couple_avatar_2) ? theme.config?.sidebar?.couple_avatar_2 : '/themes/theme-ShaneYu/assets/images/avatar.png'}"
+            alt=""
+          />
+        </div>
+      </div>
+      <div class="couple-names" th:if="${theme.config?.sidebar?.show_couple_names != false}">
+        <span th:text="${theme.config?.sidebar?.couple_name_1 ?: '他'}"></span>
+        <svg
+          class="couple-heart-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+          />
+        </svg>
+        <span th:text="${theme.config?.sidebar?.couple_name_2 ?: '她'}"></span>
+      </div>
+      <div class="couple-since">
+        <span data-i18n="sidebar.couple_since">在一起</span>
+        <span
+          class="couple-duration"
+          th:data-since="${theme.config?.sidebar?.couple_since_date}"
+        ></span>
+      </div>
+    </div>
+  </div>
+
   <div class="widget widget-tag-cloud" th:if="${theme.config?.sidebar?.show_tag_cloud != false}">
     <div class="widget-title">
       <span class="title-text" data-i18n="sidebar.tag_cloud">思想碎片</span>
