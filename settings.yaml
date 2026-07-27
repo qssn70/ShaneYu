@@ -201,10 +201,9 @@ spec:
           help: 情侣卡片左侧头像,建议 1:1 方形图
         - $formkit: text
           name: couple_name_1
-          label: 男生名字 *
+          label: 男生名字
           value: ""
-          validation: required
-          help: 左侧头像对应的名字,必填项
+          help: 左侧头像对应的名字
         - $formkit: attachment
           name: couple_avatar_2
           label: 女生头像
@@ -212,16 +211,14 @@ spec:
           help: 情侣卡片右侧头像,建议 1:1 方形图
         - $formkit: text
           name: couple_name_2
-          label: 女生名字 *
+          label: 女生名字
           value: ""
-          validation: required
-          help: 右侧头像对应的名字,必填项
+          help: 右侧头像对应的名字
         - $formkit: date
           name: couple_since_date
-          label: 在一起时间 *
+          label: 在一起时间
           value: ""
-          validation: required
-          help: 显示在一起的日期,必填项
+          help: 显示在一起的日期
         - $formkit: text
           name: couple_link
           label: 跳转链接

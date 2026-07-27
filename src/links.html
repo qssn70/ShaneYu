@@ -1,0 +1,234 @@
+<include src="partials/layout.html">
+  <template name="head">
+    <title th:text="|${linksTitle} - ${site.title}|">友情链接</title>
+    <link rel="stylesheet" href="./css/links.css" />
+  </template>
+
+  <div
+    class="layout-grid sidebar-left"
+    th:classappend="${theme.config?.sidebar?.show_sidebar == false ? ' no-sidebar' : ''}"
+  >
+    <th:block th:if="${theme.config?.sidebar?.show_sidebar != false}">
+      <include src="partials/sidebar.html"></include>
+    </th:block>
+
+    <div class="content-area">
+      <div class="page-header">
+        <div class="page-header-inner">
+          <div class="page-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+          </div>
+          <div class="page-header-content">
+            <h1 class="page-title" th:text="${linksTitle}" data-i18n="links.title">友情链接</h1>
+            <p class="page-desc" data-i18n="links.desc">那些与我们同行的站点</p>
+          </div>
+          <div class="page-header-stats">
+            <div class="stat-item">
+              <span
+                class="stat-value"
+                th:text="${#lists.isEmpty(groups) ? 0 : linkFinder.count()}"
+              ></span>
+              <span class="stat-label" data-i18n="links.count">个链接</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="links-filter">
+        <a
+          th:href="@{/links}"
+          th:classappend="${group == null} ? ' active'"
+          class="links-filter-item"
+          data-i18n="links.all"
+          >全部</a
+        >
+        <a
+          th:each="item : ${simpleGroups}"
+          th:href="@{/links(group=${item.metadata.name})}"
+          th:classappend="${group == item.metadata.name} ? ' active'"
+          class="links-filter-item"
+          th:text="${item.spec.displayName}"
+        ></a>
+      </div>
+
+      <div class="links-groups" th:if="${not #lists.isEmpty(groups)}">
+        <div th:each="item : ${groups}" class="links-group-section">
+          <h2 class="links-group-title" th:text="${item.spec.displayName} ?: '未分组'"></h2>
+          <div class="links-grid">
+            <a
+              th:each="link : ${item.links}"
+              th:href="${link.spec.url}"
+              target="_blank"
+              rel="noopener"
+              class="link-card"
+            >
+              <div class="link-card-logo">
+                <img
+                  th:if="${link.spec.logo != null and !#strings.isEmpty(link.spec.logo)}"
+                  th:src="${link.spec.logo}"
+                  th:alt="${link.spec.displayName}"
+                  loading="lazy"
+                />
+                <div
+                  th:unless="${link.spec.logo != null and !#strings.isEmpty(link.spec.logo)}"
+                  class="link-card-logo-fallback"
+                  th:text="${#strings.abbreviate(link.spec.displayName, 1)}"
+                ></div>
+              </div>
+              <div class="link-card-content">
+                <h3 class="link-card-name" th:text="${link.spec.displayName}"></h3>
+                <p
+                  class="link-card-desc"
+                  th:if="${link.spec.description != null and !#strings.isEmpty(link.spec.description)}"
+                  th:text="${link.spec.description}"
+                ></p>
+                <span class="link-card-url" th:text="${link.spec.url}"></span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" th:if="${#lists.isEmpty(groups)}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        <p data-i18n="links.empty">暂无友情链接</p>
+      </div>
+
+      <div class="links-apply-section">
+        <button class="links-apply-toggle" id="linksApplyToggle" data-i18n="links.apply_btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span data-i18n="links.apply_title">申请友情链接</span>
+        </button>
+
+        <div class="links-apply-form" id="linksApplyForm" style="display: none">
+          <div class="apply-form-header">
+            <h3 data-i18n="links.apply_form_title">提交友链申请</h3>
+            <p data-i18n="links.apply_form_desc">填写以下信息提交友链申请,管理员审核后将展示</p>
+          </div>
+
+          <form id="linksApplyFormEl" class="apply-form" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="applyDisplayName" data-i18n="links.field_name">网站名称</label>
+                <input
+                  type="text"
+                  id="applyDisplayName"
+                  name="displayName"
+                  required
+                  placeholder="请输入网站名称"
+                />
+              </div>
+              <div class="form-group">
+                <label for="applyUrl" data-i18n="links.field_url">网站地址</label>
+                <input
+                  type="url"
+                  id="applyUrl"
+                  name="url"
+                  required
+                  placeholder="https://example.com"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="applyLogo" data-i18n="links.field_logo">网站Logo</label>
+                <input
+                  type="url"
+                  id="applyLogo"
+                  name="logo"
+                  placeholder="https://example.com/logo.png"
+                />
+              </div>
+              <div class="form-group">
+                <label for="applyEmail" data-i18n="links.field_email">邮箱</label>
+                <input type="email" id="applyEmail" name="email" placeholder="you@example.com" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="applyDescription" data-i18n="links.field_desc">网站描述</label>
+              <textarea
+                id="applyDescription"
+                name="description"
+                rows="3"
+                placeholder="简要描述一下你的网站"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="applyLinkPageUrl" data-i18n="links.field_link_page">友链页面</label>
+                <input
+                  type="url"
+                  id="applyLinkPageUrl"
+                  name="linkPageUrl"
+                  placeholder="https://example.com/links"
+                />
+              </div>
+              <div class="form-group">
+                <label for="applyGroup" data-i18n="links.field_group">友链分组</label>
+                <select id="applyGroup" name="groupName">
+                  <option value="" data-i18n="links.select_group">请选择分组</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="applyRssUrl" data-i18n="links.field_rss">RSS地址</label>
+                <input
+                  type="url"
+                  id="applyRssUrl"
+                  name="rssUrl"
+                  placeholder="https://example.com/rss.xml"
+                />
+              </div>
+              <div class="form-group captcha-group">
+                <label for="applyVerifyCode" data-i18n="links.field_verify">验证码</label>
+                <div class="captcha-row">
+                  <input type="text" id="applyVerifyCode" name="verifyCode" placeholder="验证码" />
+                  <img
+                    id="applyCaptcha"
+                    class="captcha-img"
+                    src=""
+                    alt="captcha"
+                    title="点击刷新验证码"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-submit" id="applySubmitBtn">
+                <span data-i18n="links.submit">提交申请</span>
+              </button>
+              <button type="reset" class="btn-reset" id="applyResetBtn">
+                <span data-i18n="links.reset">重置</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="apply-form-result" id="applyFormResult" style="display: none">
+            <div class="result-icon" id="applyResultIcon"></div>
+            <p class="result-msg" id="applyResultMsg"></p>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${haloCommentEnabled}" style="margin-top: 24px">
+        <halo:comment group="plugin.halo.run" kind="Plugin" th:attr="name=${pluginName}" />
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/links.ts"></script>
+</include>

@@ -1,12 +1,30 @@
+import { checkPlugin, showToast, getI18nText } from "./plugin-check";
+
+const MOMENTS_API_BASE = "/apis/moment.halo.run/v1alpha1";
+
+const momentsPluginDetected = checkPlugin({
+  apiBase: MOMENTS_API_BASE + "/moments",
+  cacheKey: "moment-plugin",
+});
+
+momentsPluginDetected.then(function (available) {
+  if (!available) {
+    console.warn("[Moments] Moments plugin is not installed or enabled.");
+    showToast(
+      getI18nText("moments.plugin_not_installed", "瞬间插件未安装或未启用,请先在后台应用市场安装"),
+      "error",
+      5000,
+    );
+  }
+});
+
 function openLightbox(el: HTMLElement) {
   const src = el.getAttribute("data-src");
   if (!src) return;
 
-  // 暂停所有视频播放
   const videos = document.querySelectorAll("video");
   videos.forEach(function (video) {
     video.pause();
-    // 在移动端，确保视频元素不干扰灯箱显示
     video.style.zIndex = "-1";
   });
 
@@ -22,7 +40,6 @@ function closeLightbox() {
   lightbox.classList.remove("active");
   document.body.style.overflow = "";
 
-  // 恢复视频的 z-index
   const videos = document.querySelectorAll("video");
   videos.forEach(function (video) {
     video.style.zIndex = "";
@@ -33,7 +50,6 @@ document.addEventListener("keydown", function (e) {
   if (e.key === "Escape") closeLightbox();
 });
 
-// 瞬间评论切换
 function toggleMomentComment(btn: HTMLElement) {
   var card = btn.closest(".moment-card");
   if (!card) return;
@@ -50,7 +66,6 @@ function toggleMomentComment(btn: HTMLElement) {
   }
 }
 
-// 加载瞬间评论数
 async function loadMomentCommentCounts() {
   var countEls = document.querySelectorAll(".comment-count");
   if (!countEls.length) return;
@@ -75,7 +90,6 @@ async function loadMomentCommentCounts() {
 }
 void loadMomentCommentCounts();
 
-// 瞬间点赞（使用 Halo 通用 upvote API，与官方主题一致）
 const MOMENT_UPVOTE_KEY = "halo.upvoted.moment.names";
 
 function getUpvotedMoments(): string[] {
@@ -149,7 +163,6 @@ async function handleMomentLike(btn: HTMLElement) {
   }
 }
 
-// 页面加载时恢复点赞状态（从 localStorage 读取）
 function restoreUpvoteState() {
   const upvotedNames = getUpvotedMoments();
   if (!upvotedNames.length) return;
@@ -164,21 +177,16 @@ function restoreUpvoteState() {
 }
 restoreUpvoteState();
 
-// 媒体播放互斥 - 确保同一时间只有一个音视频在播放
 function setupMediaPlaybackMutex() {
-  // 获取所有媒体元素
   const videos = document.querySelectorAll("video");
   const audios = document.querySelectorAll("audio");
 
-  // 暂停除当前播放元素外的所有媒体
   function pauseOtherMedia(currentMedia: HTMLMediaElement) {
-    // 暂停所有视频
     videos.forEach(function (video) {
       if (video !== currentMedia) {
         video.pause();
       }
     });
-    // 暂停所有音频
     audios.forEach(function (audio) {
       if (audio !== currentMedia) {
         audio.pause();
@@ -186,14 +194,12 @@ function setupMediaPlaybackMutex() {
     });
   }
 
-  // 为每个视频添加播放事件监听
   videos.forEach(function (video) {
     video.addEventListener("play", function () {
       pauseOtherMedia(video);
     });
   });
 
-  // 为每个音频添加播放事件监听
   audios.forEach(function (audio) {
     audio.addEventListener("play", function () {
       pauseOtherMedia(audio);
@@ -201,12 +207,10 @@ function setupMediaPlaybackMutex() {
   });
 }
 
-// 页面加载完成后初始化媒体播放互斥
 document.addEventListener("DOMContentLoaded", function () {
   setupMediaPlaybackMutex();
 });
 
-// 挂载到全局供 onclick 使用
 (window as any).openLightbox = openLightbox;
 (window as any).closeLightbox = closeLightbox;
 (window as any).toggleMomentComment = toggleMomentComment;
