@@ -5,6 +5,205 @@
     <script type="module" src="./js/index.ts"></script>
   </template>
 
+  <!-- 明信片覆盖层 -->
+  <div
+    class="postcard-overlay"
+    th:if="${theme.config?.postcard?.enable_postcard and theme.config?.postcard?.postcard_front_media != null and !#strings.isEmpty(theme.config?.postcard?.postcard_front_media)}"
+    th:data-refresh-interval="${theme.config?.postcard?.postcard_refresh_interval ?: ''}"
+  >
+    <div class="postcard-scene">
+      <div class="postcard-card">
+        <!-- 正面：图片/视频 -->
+        <div class="postcard-face postcard-front">
+          <video
+            th:if="${theme.config?.postcard?.postcard_front_media != null and (theme.config?.postcard?.postcard_front_media.endsWith('.mp4') or theme.config?.postcard?.postcard_front_media.endsWith('.webm') or theme.config?.postcard?.postcard_front_media.endsWith('.mov') or theme.config?.postcard?.postcard_front_media.endsWith('.mkv') or theme.config?.postcard?.postcard_front_media.endsWith('.avi') or theme.config?.postcard?.postcard_front_media.endsWith('.flv') or theme.config?.postcard?.postcard_front_media.endsWith('.3gp'))}"
+            th:src="${theme.config?.postcard?.postcard_front_media}"
+            autoplay
+            muted
+            loop
+            playsinline
+          ></video>
+          <img
+            th:unless="${theme.config?.postcard?.postcard_front_media.endsWith('.mp4') or theme.config?.postcard?.postcard_front_media.endsWith('.webm') or theme.config?.postcard?.postcard_front_media.endsWith('.mov') or theme.config?.postcard?.postcard_front_media.endsWith('.mkv') or theme.config?.postcard?.postcard_front_media.endsWith('.avi') or theme.config?.postcard?.postcard_front_media.endsWith('.flv') or theme.config?.postcard?.postcard_front_media.endsWith('.3gp')}"
+            th:src="${theme.config?.postcard?.postcard_front_media}"
+            alt="postcard"
+          />
+          <div class="postcard-front-hint">
+            <img th:src="@{/assets/icons/flipflip.svg}" alt="" class="postcard-flip-icon" />
+            <span>点击翻转</span>
+          </div>
+        </div>
+        <!-- 背面：公众号 + 网站信息 -->
+        <div class="postcard-face postcard-back">
+          <div class="postcard-back-columns">
+            <!-- 左侧：公众号二维码 -->
+            <div class="postcard-back-left">
+              <div
+                th:if="${theme.config?.sidebar?.show_wechat_qr and theme.config?.sidebar?.wechat_qr_image != null and !#strings.isEmpty(theme.config?.sidebar?.wechat_qr_image)}"
+              >
+                <img
+                  th:src="${theme.config?.sidebar?.wechat_qr_image}"
+                  alt="公众号二维码"
+                  class="postcard-qr-img"
+                />
+              </div>
+              <div class="postcard-qr-info">
+                <span
+                  class="postcard-qr-title"
+                  th:if="${theme.config?.sidebar?.wechat_qr_title != null and !#strings.isEmpty(theme.config?.sidebar?.wechat_qr_title)}"
+                  th:text="${theme.config?.sidebar?.wechat_qr_title}"
+                ></span>
+                <span class="postcard-qr-desc">期待你的关注！</span>
+              </div>
+            </div>
+            <!-- 右侧：网站信息 -->
+            <div class="postcard-back-right">
+              <div class="postcard-back-header">
+                <img
+                  class="postcard-back-logo"
+                  th:src="${theme.config?.basic?.logo_image != null and !#strings.isEmpty(theme.config?.basic?.logo_image) ? theme.config?.basic?.logo_image : '/themes/theme-ShaneYu/assets/images/logo.png'}"
+                  alt="Logo"
+                />
+                <div class="postcard-back-site-info">
+                  <span
+                    class="postcard-back-site-name"
+                    th:text="${theme.config?.basic?.logo_text ?: site.title}"
+                  ></span>
+                  <span
+                    class="postcard-back-profession"
+                    th:if="${theme.config?.about?.profession != null and !#strings.isEmpty(theme.config?.about?.profession)}"
+                    th:text="${theme.config?.about?.profession}"
+                  ></span>
+                </div>
+              </div>
+              <div class="postcard-back-body">
+                <!-- 联系方式 -->
+                <div
+                  th:if="${theme.config?.social?.links != null and !#lists.isEmpty(theme.config?.social?.links)}"
+                >
+                  <div class="postcard-section-title" data-i18n="postcard.contact">联系方式</div>
+                  <div class="postcard-contact-list">
+                    <a
+                      th:each="link : ${theme.config?.social?.links}"
+                      th:if="${link.url != null and !#strings.isEmpty(link.url)}"
+                      th:href="${link.icon == 'email' ? 'mailto:' + link.url : link.url}"
+                      th:target="${link.icon != 'email' ? '_blank' : ''}"
+                      class="postcard-contact-link"
+                    >
+                      <iconify-icon
+                        th:if="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:icon="${link.iconifyIcon}"
+                      ></iconify-icon>
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'github'}"
+                        src="./assets/icons/github.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'gitee'}"
+                        src="./assets/icons/gitee.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'email'}"
+                        src="./assets/icons/email.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'weibo'}"
+                        src="./assets/icons/webo.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'qq'}"
+                        src="./assets/icons/qq.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'csdn'}"
+                        src="./assets/icons/csdn.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'youtube'}"
+                        src="./assets/icons/youtube.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'wechat'}"
+                        src="./assets/icons/wechat.svg"
+                        alt=""
+                      />
+                      <img
+                        th:unless="${link.iconifyIcon != null and !#strings.isEmpty(link.iconifyIcon)}"
+                        th:if="${link.icon == 'zhihu'}"
+                        src="./assets/icons/zhihu.svg"
+                        alt=""
+                      />
+                      <span th:text="${link.name}"></span>
+                    </a>
+                  </div>
+                </div>
+                <!-- 技能 -->
+                <div
+                  th:if="${theme.config?.about?.skills != null and !#lists.isEmpty(theme.config?.about?.skills)}"
+                >
+                  <div class="postcard-section-title" data-i18n="postcard.skills">技能</div>
+                  <div class="postcard-skills-list">
+                    <a
+                      th:each="skill : ${theme.config?.about?.skills}"
+                      th:if="${skill.tag_slug != null and !#strings.isEmpty(skill.tag_slug)}"
+                      th:href="|/tags/${skill.tag_slug}|"
+                      class="postcard-skill-tag"
+                      th:text="${skill.name}"
+                    ></a>
+                    <span
+                      th:each="skill : ${theme.config?.about?.skills}"
+                      th:if="${skill.tag_slug == null or #strings.isEmpty(skill.tag_slug)}"
+                      class="postcard-skill-tag"
+                      th:text="${skill.name}"
+                    ></span>
+                  </div>
+                </div>
+                <!-- 明信片自定义内容 -->
+                <div
+                  th:if="${theme.config?.postcard?.postcard_content != null and !#strings.isEmpty(theme.config?.postcard?.postcard_content)}"
+                  class="postcard-custom-content"
+                  th:utext="${theme.config?.postcard?.postcard_content}"
+                ></div>
+              </div>
+            </div>
+          </div>
+          <!-- 进入首页按钮 -->
+          <div class="postcard-enter-btn">
+            <a th:href="@{/}" class="postcard-enter-link">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+              <span th:text="${theme.config?.postcard?.postcard_enter_text ?: '进入首页'}"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="layout-grid sidebar-left">
     <include src="partials/sidebar.html"></include>
     <div class="content-area">

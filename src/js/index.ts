@@ -1,3 +1,6 @@
+import "../css/postcard.css";
+import "./postcard";
+
 (function () {
   "use strict";
 

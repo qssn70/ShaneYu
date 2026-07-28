@@ -137,6 +137,9 @@ const translations = {
     "links.error_verify_required": "请输入验证码",
     "links.error_network": "网络错误,请稍后重试",
     "links.plugin_not_installed": "友链自助提交插件未安装,请先在后台应用市场安装",
+    "postcard.contact": "联系方式",
+    "postcard.skills": "技能",
+    "postcard.enter_home": "进入首页",
   },
   "zh-TW": {
     "nav.home": "首頁",
@@ -275,6 +278,9 @@ const translations = {
     "links.error_verify_required": "請輸入驗證碼",
     "links.error_network": "網絡錯誤,請稍後重試",
     "links.plugin_not_installed": "友鏈自助提交插件未安裝,請先在後台應用市場安裝",
+    "postcard.contact": "聯繫方式",
+    "postcard.skills": "技能",
+    "postcard.enter_home": "進入首頁",
   },
   en: {
     "nav.home": "Home",
@@ -417,6 +423,9 @@ const translations = {
     "links.error_network": "Network error, please try again later",
     "links.plugin_not_installed":
       "The link submission plugin is not installed. Please install it from the admin panel.",
+    "postcard.contact": "Contact",
+    "postcard.skills": "Skills",
+    "postcard.enter_home": "Enter Site",
   },
   es: {
     "nav.home": "Inicio",
@@ -560,6 +569,9 @@ const translations = {
     "links.error_network": "Error de red, inténtalo más tarde",
     "links.plugin_not_installed":
       "El complemento de envío de enlaces no está instalado. Instálalo desde el panel de administración.",
+    "postcard.contact": "Contacto",
+    "postcard.skills": "Habilidades",
+    "postcard.enter_home": "Entrar al Sitio",
   },
 };
 

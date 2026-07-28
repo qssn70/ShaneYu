@@ -86,24 +86,26 @@ if (!applyToggleBtn || !applyFormContainer || !applyFormEl) {
       return;
     }
 
-    checkPlugin({ apiBase: API_BASE, cacheKey: "link-submit" }).then(function (available) {
-      if (!available) {
-        showToast(
-          getI18nText(
-            "links.plugin_not_installed",
-            "友链自助提交插件未安装,请先在后台应用市场安装",
-          ),
-          "error",
-        );
-        return;
-      }
+    checkPlugin({ apiBase: API_BASE, cacheKey: "link-submit" })
+      .then(function (available) {
+        if (!available) {
+          showToast(
+            getI18nText(
+              "links.plugin_not_installed",
+              "友链自助提交插件未安装,请先在后台应用市场安装",
+            ),
+            "error",
+          );
+          return;
+        }
 
-      isExpanded = true;
-      formContainer.style.display = "block";
-      toggleBtn.classList.add("open");
-      loadCaptcha();
-      loadGroups();
-    });
+        isExpanded = true;
+        formContainer.style.display = "block";
+        toggleBtn.classList.add("open");
+        loadCaptcha();
+        loadGroups();
+      })
+      .catch(() => {});
   });
 
   if (applyCaptchaImg) {

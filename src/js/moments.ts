@@ -7,16 +7,21 @@ const momentsPluginDetected = checkPlugin({
   cacheKey: "moment-plugin",
 });
 
-momentsPluginDetected.then(function (available) {
-  if (!available) {
-    console.warn("[Moments] Moments plugin is not installed or enabled.");
-    showToast(
-      getI18nText("moments.plugin_not_installed", "瞬间插件未安装或未启用,请先在后台应用市场安装"),
-      "error",
-      5000,
-    );
-  }
-});
+momentsPluginDetected
+  .then(function (available) {
+    if (!available) {
+      console.warn("[Moments] Moments plugin is not installed or enabled.");
+      showToast(
+        getI18nText(
+          "moments.plugin_not_installed",
+          "瞬间插件未安装或未启用,请先在后台应用市场安装",
+        ),
+        "error",
+        5000,
+      );
+    }
+  })
+  .catch(() => {});
 
 function openLightbox(el: HTMLElement) {
   const src = el.getAttribute("data-src");

@@ -71,6 +71,38 @@ spec:
           accept: "image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,video/x-flv,video/3gpp"
           help: 上传暗色模式下的背景壁纸,支持图片和视频格式
 
+    - group: postcard
+      label: 明信片设置
+      formSchema:
+        - $formkit: switch
+          name: enable_postcard
+          label: 启用首页明信片
+          value: false
+          help: 开启后访问首页时需先查看全屏明信片，点击翻转后可进入首页
+        - $formkit: attachment
+          name: postcard_front_media
+          label: 明信片正面图片/视频
+          value: ""
+          accept: "image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,video/x-flv,video/3gpp"
+          help: 上传明信片正面展示的图片或视频，建议横版 16:9 比例
+        - $formkit: text
+          name: postcard_enter_text
+          label: 进入首页按钮文字
+          value: "进入首页"
+          help: 明信片背面点击进入首页按钮的文字
+        - $formkit: number
+          name: postcard_refresh_interval
+          label: 明信片刷新间隔（小时）
+          value: ""
+          min: 0.1
+          step: 0.1
+          help: 点击进入首页后，多久再次显示明信片。0.1=10分钟，最小0.1（10分钟），留空则每次刷新都显示
+        - $formkit: textarea
+          name: postcard_content
+          label: 明信片背面自定义内容
+          value: ""
+          help: 支持 HTML 格式，显示在明信片背面右侧区域，留空则不显示
+
     - group: social
       label: 社交链接
       formSchema:
