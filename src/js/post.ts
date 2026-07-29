@@ -1,6 +1,9 @@
 import "../css/main.css";
+import QRious from "../assets/js/qrious.min.js";
 import { getI18nText } from "./plugin-check";
-import "../assets/js/qrious.min.js";
+
+// 将 QRious 挂载到 window 对象上，确保全局可用
+(window as any).QRious = QRious;
 
 // ===== 文章主要逻辑 =====
 (function () {
