@@ -251,10 +251,43 @@ import { getI18nText } from "./plugin-check";
       e.stopPropagation();
     });
 
+    // 处理URL，移除非必要的端口
+    function cleanUrl(url: string): string {
+      try {
+        var parsed = new URL(url);
+        var isStandardPort =
+          (parsed.protocol === "https:" && (parsed.port === "443" || !parsed.port)) ||
+          (parsed.protocol === "http:" && (parsed.port === "80" || !parsed.port));
+
+        // 如果是标准端口，移除它
+        if (isStandardPort) {
+          parsed.port = "";
+        } else {
+          // 如果URL有非标准端口，检查当前页面访问是否也用了这个端口
+          // 如果当前页面用的是标准端口或不同端口，则移除URL的端口
+          var currentPort = window.location.port;
+          var currentIsStandard =
+            (parsed.protocol === "https:" && (currentPort === "443" || !currentPort)) ||
+            (parsed.protocol === "http:" && (currentPort === "80" || !currentPort));
+
+          if (currentIsStandard || currentPort !== parsed.port) {
+            parsed.port = "";
+          }
+        }
+
+        return parsed.toString();
+      } catch {
+        return url;
+      }
+    }
+
     var shareItems = shareMenu.querySelectorAll(".share-item");
-    var shareUrl = window.location.href;
+    var shareUrl = cleanUrl(
+      document.querySelector('meta[name="share-url"]')?.getAttribute("content") ||
+        window.location.href,
+    );
     var shareTitle = document.title || "";
-    var siteUrl = window.location.origin;
+    var siteUrl = cleanUrl(window.location.origin);
 
     shareItems.forEach(function (item) {
       item.addEventListener("click", async function () {
