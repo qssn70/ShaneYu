@@ -501,6 +501,40 @@ import "./i18n";
   initDynamicBackground();
 
   // ===== 情侣卡片时间计算 =====
+  function parseLocalDate(dateStr: string): Date | null {
+    // 处理日期字符串，确保使用本地时间而不是UTC时间
+    // 支持格式: YYYY-MM-DD, YYYY-MM-DD HH:mm:ss, YYYY/MM/DD 等
+    if (!dateStr) return null;
+
+    // 如果包含时间部分 (YYYY-MM-DD HH:mm:ss)
+    const datetimeMatch = dateStr.match(
+      /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[T\s]+(\d{1,2}):(\d{1,2}):(\d{1,2})/,
+    );
+    if (datetimeMatch) {
+      return new Date(
+        parseInt(datetimeMatch[1]),
+        parseInt(datetimeMatch[2]) - 1, // 月份从0开始
+        parseInt(datetimeMatch[3]),
+        parseInt(datetimeMatch[4]),
+        parseInt(datetimeMatch[5]),
+        parseInt(datetimeMatch[6]),
+      );
+    }
+
+    // 如果只有日期部分 (YYYY-MM-DD)
+    const dateMatch = dateStr.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (dateMatch) {
+      return new Date(
+        parseInt(dateMatch[1]),
+        parseInt(dateMatch[2]) - 1, // 月份从0开始
+        parseInt(dateMatch[3]),
+      );
+    }
+
+    // 如果以上格式都不匹配，尝试直接解析
+    return new Date(dateStr);
+  }
+
   function updateCoupleDuration() {
     const durationEls = document.querySelectorAll(".couple-duration");
     durationEls.forEach(function (el) {
@@ -510,7 +544,12 @@ import "./i18n";
         return;
       }
 
-      const startDate = new Date(sinceDate);
+      const startDate = parseLocalDate(sinceDate);
+      if (!startDate || isNaN(startDate.getTime())) {
+        el.textContent = "";
+        return;
+      }
+
       const now = new Date();
 
       const diff = now.getTime() - startDate.getTime();
