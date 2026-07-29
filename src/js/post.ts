@@ -1,4 +1,6 @@
 import "../css/main.css";
+import { getI18nText } from "./plugin-check";
+import "../assets/js/qrious.min.js";
 
 // ===== 文章主要逻辑 =====
 (function () {
@@ -248,40 +250,89 @@ import "../css/main.css";
 
     var shareItems = shareMenu.querySelectorAll(".share-item");
     var shareUrl = window.location.href;
-    var shareTitle = document.title;
+    var shareTitle = document.title || "";
+    var siteUrl = window.location.origin;
 
     shareItems.forEach(function (item) {
       item.addEventListener("click", async function () {
         var type = (item as HTMLElement).dataset.share;
-        var excerpt = shareMenu!.dataset.excerpt || "";
-        if (!excerpt) {
-          var descriptionEl = document.querySelector(".prose p");
-          excerpt = descriptionEl ? descriptionEl.textContent || "" : "";
-        }
-        excerpt = excerpt.slice(0, 100);
-        var shareContent = shareTitle + "\n" + excerpt + "\n" + shareUrl;
-        if (type === "qzone") {
-          window.open("https://qzone.qq.com/", "_blank");
-        } else if (type === "weibo") {
-          window.open("https://weibo.com/", "_blank");
-        }
-        var success = await copyToClipboard(shareContent);
-        if (success) {
-          if (type === "qzone") {
-            showToast("已复制文章信息，请在QQ空间中粘贴分享");
-          } else if (type === "weibo") {
-            showToast("已复制文章信息，请在微博中粘贴分享");
-          } else if (type === "wechat") {
-            showToast("已复制文章信息，请在微信中粘贴分享");
-          } else if (type === "copy") {
-            showToast("已复制文章信息到剪贴板");
+
+        if (type === "system") {
+          // 系统分享 - 使用 Web Share API
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: shareTitle,
+                url: shareUrl,
+              });
+            } catch (err) {
+              // 用户取消分享或分享失败
+              if (err instanceof Error && err.name !== "AbortError") {
+                showToast(getI18nText("share.system_error", "分享失败"));
+              }
+            }
+          } else {
+            // 浏览器不支持 Web Share API，提示用户
+            showToast(
+              getI18nText(
+                "share.system_not_supported",
+                "当前浏览器不支持系统分享，请使用其他分享方式",
+              ),
+            );
           }
-        } else {
-          showToast("复制失败，请手动复制链接");
+        } else if (type === "qzone") {
+          // QQ空间分享 - 使用官方分享URL
+          var metaDesc =
+            document.querySelector('meta[name="description"]')?.getAttribute("content") ||
+            document.querySelector('meta[property="og:description"]')?.getAttribute("content") ||
+            "";
+          var qzoneUrl =
+            "https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=" +
+            encodeURIComponent(shareUrl) +
+            "&title=" +
+            encodeURIComponent(shareTitle) +
+            "&summary=" +
+            encodeURIComponent(metaDesc) +
+            "&desc=" +
+            encodeURIComponent(metaDesc) +
+            "&site=" +
+            encodeURIComponent(siteUrl);
+          window.open(qzoneUrl, "_blank");
+          showToast(getI18nText("share.qzone_opened", "已打开QQ空间分享"));
+        } else if (type === "weibo") {
+          // 微博分享 - 使用官方分享URL
+          // 使用 window.location.href 代替 window.open，避免登录后弹窗关闭问题
+          var weiboUrl =
+            "https://service.weibo.com/share/share.php?url=" +
+            encodeURIComponent(shareUrl) +
+            "&title=" +
+            encodeURIComponent(shareTitle);
+          window.location.href = weiboUrl;
+        } else if (type === "wechat") {
+          // 微信分享 - 显示二维码弹窗
+          showWeChatQrModal(shareUrl);
+        } else if (type === "copy") {
+          // 复制链接 - 复制标题+链接到剪贴板
+          var shareContent = shareTitle + "\n" + shareUrl;
+          var success = await copyToClipboard(shareContent);
+          if (success) {
+            showToast(getI18nText("share.copied", "已复制标题和链接到剪贴板"));
+          } else {
+            showToast(getI18nText("share.copy_failed", "复制失败，请手动复制链接"));
+          }
         }
+
         shareMenu!.classList.remove("show");
       });
     });
+
+    // 检测浏览器是否支持 Web Share API，如果不支持则隐藏系统分享按钮
+    var systemShareBtn = document.getElementById("shareSystemBtn");
+    if (systemShareBtn) {
+      if (!navigator.share) {
+        systemShareBtn.style.display = "none";
+      }
+    }
   }
 
   // ----- 返回顶部（支持拖拽） -----
@@ -394,6 +445,69 @@ import "../css/main.css";
         document.body.removeChild(toast);
       }, 300);
     }, 2000);
+  }
+
+  // ----- 微信二维码弹窗 -----
+  function showWeChatQrModal(url: string): void {
+    var modal = document.getElementById("wechatQrModal");
+    var canvas = document.getElementById("wechatQrCanvas");
+    var urlEl = document.getElementById("wechatQrUrl");
+    var titleEl = document.getElementById("wechatQrTitle");
+    var descEl = document.getElementById("wechatQrDesc");
+    var closeBtn = document.getElementById("wechatQrClose");
+    var overlay = modal?.querySelector(".wechat-qr-overlay");
+
+    if (!modal || !canvas) return;
+
+    // 设置i18n文本
+    if (titleEl) {
+      titleEl.textContent = getI18nText("share.wechat_qr_title", "微信扫码分享");
+    }
+    if (descEl) {
+      descEl.textContent = getI18nText("share.wechat_qr_desc", "打开微信，扫描下方二维码分享");
+    }
+
+    // 显示URL
+    if (urlEl) {
+      urlEl.textContent = url;
+    }
+
+    // 使用 QRious 生成二维码
+    if (typeof (window as any).QRious !== "undefined") {
+      new (window as any).QRious({
+        element: canvas as HTMLCanvasElement,
+        value: url,
+        size: 200,
+        level: "M",
+      });
+    }
+
+    // 显示模态框
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+
+    // 关闭模态框
+    function closeModal(): void {
+      if (modal) {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      }
+    }
+
+    // 绑定关闭事件
+    if (closeBtn) {
+      closeBtn.onclick = closeModal;
+    }
+    if (overlay) {
+      overlay.addEventListener("click", closeModal);
+    }
+
+    // ESC键关闭
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && modal && modal.style.display === "flex") {
+        closeModal();
+      }
+    });
   }
 
   // ----- 阅读统计 -----

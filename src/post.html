@@ -1,6 +1,20 @@
 <include src="layout.html">
   <template name="head">
     <title th:text="|${post.spec.title} - ${site.title}|">文章标题</title>
+    <meta
+      name="description"
+      th:content="${post.status?.excerpt != null and !#strings.isEmpty(post.status?.excerpt) ? post.status?.excerpt : (post.spec?.title != null ? post.spec?.title : site.title)}"
+    />
+    <meta
+      property="og:title"
+      th:content="${post.spec?.title != null ? post.spec?.title : site.title}"
+    />
+    <meta
+      property="og:description"
+      th:content="${post.status?.excerpt != null and !#strings.isEmpty(post.status?.excerpt) ? post.status?.excerpt : (post.spec?.title != null ? post.spec?.title : site.title)}"
+    />
+    <meta property="og:url" th:content="|${site.url}${post.status?.permalink}|" />
+    <meta property="og:type" content="article" />
     <link rel="stylesheet" href="./css/post.css" />
     <script type="module" src="./js/post.ts"></script>
   </template>
@@ -54,7 +68,10 @@
         </div>
 
         <!-- Header -->
-        <header class="article-detail-header">
+        <header
+          class="article-detail-header"
+          th:with="upvoteCount = ${post.stats?.upvote ?: 0}, commentCount = ${post.stats?.comment ?: 0}"
+        >
           <h1 class="article-detail-title" th:text="${post.spec.title}"></h1>
           <div class="article-detail-meta">
             <span class="meta-item" th:if="${post.owner}">
@@ -98,50 +115,10 @@
               </svg>
               <span class="read-time-text"></span>
             </span>
-            <span class="meta-item" th:if="${post.stats?.comment}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-              <span th:text="${post.stats?.comment ?: 0}" data-i18n-suffix="post.comments"></span>
-            </span>
-            <span class="meta-item" th:if="${not #lists.isEmpty(post.categories)}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path
-                  d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-                />
-              </svg>
-              <a
-                th:each="cat : ${post.categories}"
-                th:href="@{${cat.status.permalink}}"
-                th:text="${cat.spec.displayName}"
-                style="color: inherit; margin-right: 4px"
-              ></a>
-            </span>
-          </div>
-        </header>
 
-        <!-- Content -->
-        <div class="prose" th:utext="${post.content.content}"></div>
-
-        <!-- Footer -->
-        <footer class="article-footer">
-          <!-- Tags -->
-          <div class="article-tags-row" th:if="${not #lists.isEmpty(post.tags)}">
-            <a
-              th:each="tag : ${post.tags}"
-              th:href="@{${tag.status.permalink}}"
-              th:text="${tag.spec.displayName}"
-              class="tag"
-            ></a>
-          </div>
-
-          <!-- Post Actions -->
-          <div
-            class="post-actions-bar"
-            th:with="upvoteCount = ${post.stats?.upvote ?: 0}, commentCount = ${post.stats?.comment ?: 0}"
-          >
+            <!-- Action Buttons (inline in meta row) -->
             <button
-              class="post-action-btn action-upvote"
+              class="meta-action-btn action-upvote"
               id="upvoteBtn"
               th:attr="data-post=${post.metadata.name}"
             >
@@ -154,7 +131,7 @@
               <span class="action-count" id="upvoteCount" th:text="${upvoteCount}"></span>
             </button>
             <button
-              class="post-action-btn action-comment"
+              class="meta-action-btn action-comment"
               id="commentBtn"
               th:if="${haloCommentEnabled}"
             >
@@ -163,39 +140,144 @@
               </svg>
               <span class="action-count" th:text="${commentCount}"></span>
             </button>
-            <button class="post-action-btn action-share" id="shareBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="18" cy="5" r="3" />
-                <circle cx="6" cy="12" r="3" />
-                <circle cx="18" cy="19" r="3" />
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-              </svg>
-            </button>
-            <div
-              class="action-share-menu"
-              id="shareMenu"
-              th:attr="data-excerpt=${post.status.excerpt ?: ''}"
-            >
-              <button class="share-item" data-share="qzone" data-i18n-title="share.qzone">
-                <img src="./assets/icons/qqkongjian.svg" alt="QQ空间" />
-                <span data-i18n="share.qzone">QQ空间</span>
-              </button>
-              <button class="share-item" data-share="wechat" data-i18n-title="share.wechat">
-                <img src="./assets/icons/wechat.svg" alt="微信" />
-                <span data-i18n="share.wechat">微信</span>
-              </button>
-              <button class="share-item" data-share="weibo" data-i18n-title="share.weibo">
-                <img src="./assets/icons/webo.svg" alt="微博" />
-                <span data-i18n="share.weibo">微博</span>
-              </button>
-              <button class="share-item" data-share="copy" data-i18n-title="share.copy_link">
+            <div class="meta-action-wrapper">
+              <button class="meta-action-btn action-share" id="shareBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                 </svg>
-                <span data-i18n="share.copy_link">复制链接</span>
               </button>
+              <div class="action-share-menu" id="shareMenu">
+                <button
+                  class="share-item"
+                  data-share="system"
+                  data-i18n-title="share.system"
+                  id="shareSystemBtn"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                  </svg>
+                  <span data-i18n="share.system">系统分享</span>
+                </button>
+                <button class="share-item" data-share="qzone" data-i18n-title="share.qzone">
+                  <img src="./assets/icons/qqkongjian.svg" alt="QQ空间" />
+                  <span data-i18n="share.qzone">QQ空间</span>
+                </button>
+                <button class="share-item" data-share="wechat" data-i18n-title="share.wechat">
+                  <img src="./assets/icons/wechat.svg" alt="微信" />
+                  <span data-i18n="share.wechat">微信</span>
+                </button>
+                <button class="share-item" data-share="weibo" data-i18n-title="share.weibo">
+                  <img src="./assets/icons/webo.svg" alt="微博" />
+                  <span data-i18n="share.weibo">微博</span>
+                </button>
+                <button class="share-item" data-share="copy" data-i18n-title="share.copy_link">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                  <span data-i18n="share.copy_link">复制链接</span>
+                </button>
+              </div>
+            </div>
+            <a
+              class="meta-action-btn action-edit"
+              sec:authorize="isAuthenticated()"
+              th:href="|/console/posts/editor?name=${post.metadata.name}&returnToView=true|"
+              target="_blank"
+              data-i18n-title="post.edit"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              <span data-i18n="post.edit">编辑</span>
+            </a>
+
+            <!-- Comment count in meta row -->
+            <span class="meta-item" th:if="${post.stats?.comment}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span th:text="${post.stats?.comment ?: 0}" data-i18n-suffix="post.comments"></span>
+            </span>
+          </div>
+
+          <!-- Categories and Tags (new line) -->
+          <div
+            class="meta-categories-tags-row"
+            th:if="${not #lists.isEmpty(post.categories) or not #lists.isEmpty(post.tags)}"
+          >
+            <!-- Categories -->
+            <a
+              class="meta-category-item"
+              th:each="cat : ${post.categories}"
+              th:href="@{${cat.status.permalink}}"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="item-icon"
+              >
+                <path
+                  d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                />
+              </svg>
+              <span th:text="${cat.spec.displayName}"></span>
+            </a>
+            <!-- Tags -->
+            <a
+              class="meta-tag-item"
+              th:each="tag : ${post.tags}"
+              th:href="@{${tag.status.permalink}}"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="item-icon"
+              >
+                <path
+                  d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+                />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+              </svg>
+              <span th:text="${tag.spec.displayName}"></span>
+            </a>
+          </div>
+        </header>
+
+        <!-- Content -->
+        <div class="prose" th:utext="${post.content.content}"></div>
+
+        <!-- Footer -->
+        <footer class="article-footer">
+          <!-- WeChat QR Code Modal -->
+          <div class="wechat-qr-modal" id="wechatQrModal" style="display: none">
+            <div class="wechat-qr-overlay"></div>
+            <div class="wechat-qr-content">
+              <button class="wechat-qr-close" id="wechatQrClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+              <h3 class="wechat-qr-title" id="wechatQrTitle">微信扫码分享</h3>
+              <p class="wechat-qr-desc" id="wechatQrDesc">打开微信，扫描下方二维码分享</p>
+              <div class="wechat-qr-wrapper">
+                <canvas id="wechatQrCanvas"></canvas>
+              </div>
+              <p class="wechat-qr-url" id="wechatQrUrl"></p>
             </div>
           </div>
 

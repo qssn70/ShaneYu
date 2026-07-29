@@ -590,4 +590,91 @@ import "./i18n";
       }
     }
   });
+
+  // ===== 用户菜单交互 =====
+  const userAvatarBtn = document.getElementById("userAvatarBtn");
+  const userDropdownMenu = document.getElementById("userDropdownMenu");
+
+  userAvatarBtn?.addEventListener("click", function (e) {
+    e.stopPropagation();
+    userDropdownMenu?.classList.toggle("show");
+  });
+
+  // 点击外部关闭用户菜单
+  document.addEventListener("click", function (e) {
+    if (
+      userDropdownMenu &&
+      userAvatarBtn &&
+      !userDropdownMenu.contains(e.target as Node) &&
+      !userAvatarBtn.contains(e.target as Node)
+    ) {
+      userDropdownMenu.classList.remove("show");
+    }
+  });
+
+  // ESC键关闭用户菜单
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && userDropdownMenu?.classList.contains("show")) {
+      userDropdownMenu.classList.remove("show");
+    }
+  });
+
+  // 动态获取用户信息（包括角色）
+  async function fetchCurrentUser() {
+    try {
+      const response = await fetch("/apis/api.console.halo.run/v1alpha1/users/-", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        console.warn("获取用户信息失败, 状态码:", response.status);
+        return;
+      }
+      const userData = await response.json();
+
+      // Console API 返回结构: { user: {...}, roles: [...] }
+      const user = userData.user || userData;
+
+      // 更新用户名
+      const userNameEl = document.querySelector(".user-name");
+      if (userNameEl && user.spec?.displayName) {
+        userNameEl.textContent = user.spec.displayName;
+      }
+
+      // 更新角色显示
+      const roleBadge = document.querySelector(".user-role-badge");
+      if (roleBadge) {
+        let role = "";
+        // 优先从 Console API 返回的 roles 数组中获取显示名
+        if (userData.roles && Array.isArray(userData.roles) && userData.roles.length > 0) {
+          const firstRole = userData.roles[0];
+          const roleAnnotations = firstRole.metadata?.annotations || {};
+          role =
+            roleAnnotations["rbac.authorization.halo.run/display-name"] ||
+            firstRole.metadata?.name ||
+            "";
+        }
+        // 兜底：从 authorities 获取
+        if (!role && user.authorities && user.authorities.length > 0) {
+          role = user.authorities[0].replace("ROLE_", "");
+        }
+        if (role) {
+          roleBadge.textContent = role;
+        }
+      }
+
+      // 更新邮箱显示
+      const emailEl = document.querySelector(".user-email") as HTMLElement | null;
+      const email = user.spec?.email || user.email || "";
+      if (emailEl) {
+        emailEl.textContent = email || "未设置邮箱";
+      }
+    } catch (error) {
+      console.error("获取用户信息失败:", error);
+    }
+  }
+
+  // 检查是否已登录（只有登录用户才获取信息）
+  if (document.querySelector(".user-menu-wrapper")) {
+    void fetchCurrentUser();
+  }
 })();
