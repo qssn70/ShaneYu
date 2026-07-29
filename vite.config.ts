@@ -15,7 +15,7 @@ export default defineConfig({
     sortTailwindcss: {},
   },
   staged: {
-    "*": ["vp check --no-lint"],
+    "{js,ts,jsx,tsx,mjs,cjs,json,md,css,html}": ["vp check --no-lint"],
     "{js,ts,jsx,tsx,mjs,cjs}": ["vp check --no-fmt"],
   },
 });
