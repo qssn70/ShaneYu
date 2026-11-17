@@ -795,7 +795,7 @@
             </div>
           </div>
           <!-- 已登录用户：显示头像和下拉菜单 -->
-          <div class="user-menu-wrapper" sec:authorize="isAuthenticated()">
+          <div class="user-menu-wrapper" sec:authorize="isAuthenticated()" th:with="currentUser = ${contributorFinder.getContributor(#authentication.name)}">
             <button class="user-avatar-btn" id="userAvatarBtn" type="button" aria-label="用户菜单">
               <img
                 class="user-avatar"
