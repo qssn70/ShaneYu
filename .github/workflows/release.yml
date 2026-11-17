@@ -1,0 +1,83 @@
+name: Publish Halo Theme Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 0.8.19; without v prefix)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-halo-theme
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Validate version and prepare theme metadata
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import re
+          version = os.environ["RELEASE_VERSION"]
+          if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?", version):
+              raise SystemExit("Invalid version: expected e.g. 0.8.19 or 0.8.19-rc.1")
+          path = pathlib.Path("theme.yaml")
+          source = path.read_text(encoding="utf-8")
+          updated, count = re.subn(r"(?m)^(  version:)\s*[^\n]+$", lambda m: m.group(1) + " " + version, source)
+          if count != 1:
+              raise SystemExit("Expected exactly one theme.yaml version field")
+          path.write_text(updated, encoding="utf-8")
+          print(f"Building theme version {version}")
+          PY
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Halo theme
+        run: pnpm build
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          IS_PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          tag="v$RELEASE_VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; refusing to overwrite." >&2
+            exit 1
+          fi
+          args=(release create "$tag" "dist/halo-theme-ShaneYu.zip" --target "$GITHUB_SHA" --title "ShaneYu $tag" --generate-notes)
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            args+=(--prerelease)
+          fi
+          gh "${args[@]}"
