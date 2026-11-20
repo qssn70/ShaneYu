@@ -59,13 +59,10 @@
     </button>
 
     <div class="content-area">
-      <article
-        class="article-detail"
-        th:with="builtinCover = '/themes/theme-ShaneYu/assets/images/default_post.png', coverUrl = ${post.spec.cover != null and !#strings.isEmpty(post.spec.cover) ? post.spec.cover : builtinCover}"
-      >
+      <article class="article-detail">
         <!-- Cover -->
-        <div class="article-detail-cover" th:if="${coverUrl != null}">
-          <img th:src="${coverUrl}" alt="" />
+        <div class="article-detail-cover" th:if="${post.spec.cover != null and !#strings.isEmpty(post.spec.cover)}">
+          <img th:src="${post.spec.cover}" alt="" />
         </div>
 
         <!-- Header -->
