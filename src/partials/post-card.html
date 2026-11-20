@@ -7,12 +7,13 @@
   <!-- Thumbnail -->
   <a
     class="article-thumb"
+    th:if="${post.spec.cover != null and !#strings.isEmpty(post.spec.cover)}"
     th:href="${postUrl}"
     th:target="${isExternal ? '_blank' : '_self'}"
     th:rel="${isExternal ? 'noopener' : ''}"
   >
     <img
-      th:src="${post.spec.cover != null and !#strings.isEmpty(post.spec.cover) ? post.spec.cover : '/themes/theme-ShaneYu/assets/images/default_post.png'}"
+      th:src="${post.spec.cover}"
       alt=""
       loading="lazy"
     />
